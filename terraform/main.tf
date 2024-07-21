@@ -62,10 +62,10 @@ resource "aws_security_group" "lambda_sg" {
 
 # Define the Lambda function
 resource "aws_lambda_function" "ec2_control" {
-  filename         = "${path.module}/../ec2_control_lambda.zip"  # Path to the deployment package
-  function_name    = "ec2_control_lambda"  # Name of the Lambda function
-  role             = aws_iam_role.lambda_exec.arn  # IAM role for Lambda execution
-  handler          = "ec2_control.lambda_handler"  # Handler function
+  filename         = "${path.module}/../ec2_control_lambda.zip"
+  function_name    = "ec2_control_lambda"
+  role             = aws_iam_role.lambda_exec.arn
+  handler          = "ec2_control.lambda_handler"
   source_code_hash = filebase64sha256("${path.module}/../ec2_control_lambda.zip")  # Hash for version control
   runtime          = "python3.8"  # Runtime environment
   timeout          = 60  # Timeout duration in seconds
