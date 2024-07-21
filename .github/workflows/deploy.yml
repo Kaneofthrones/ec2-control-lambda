@@ -37,7 +37,7 @@ jobs:
         terraform_wrapper: false
 
     - name: Initialize Terraform
-      run: terraform init
+      run: terraform init -backend-config=backend.tfvars
       working-directory: terraform
 
     - name: Lint Terraform Code
