@@ -36,6 +36,10 @@ jobs:
       with:
         terraform_wrapper: false
 
+    - name: Initialize Terraform
+      run: terraform init
+      working-directory: terraform
+
     - name: Lint Terraform Code
       run: |
         terraform fmt -check
