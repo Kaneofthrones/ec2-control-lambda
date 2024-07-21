@@ -174,7 +174,6 @@ override.tf
 override.tf.json
 terraform.tfvars
 terraform.tfvars.json
-*.tfvars
 *.tfvars.json
 .terraform.lock.hcl
 
