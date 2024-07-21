@@ -21,6 +21,73 @@ This AWS Lambda function starts and stops EC2 instances based on their tags.
 └── README.md
 ```
 
+## Requirements
+
+### Tools
+
+1. **AWS CLI**: To configure and manage AWS services from the command line.
+   - Installation: [AWS CLI Installation](https://docs.aws.amazon.com/cli/latest/userguide/install-cliv2.html)
+
+2. **Terraform**: For infrastructure as code (IaC) to deploy the Lambda function and other AWS resources.
+   - Installation: [Terraform Installation](https://learn.hashicorp.com/tutorials/terraform/install-cli)
+
+3. **Python**: To run the Lambda function script.
+   - Installation: [Python Installation](https://www.python.org/downloads/)
+
+### AWS Credentials
+
+Make sure the aws IAM role you use has the following permissions
+
+```{
+    "Version": "2012-10-17",
+    "Statement": [
+        {
+            "Effect": "Allow",
+            "Action": [
+                "iam:CreateRole",
+                "iam:AttachRolePolicy",
+                "iam:PutRolePolicy",
+                "iam:DeleteRolePolicy",
+                "iam:DeleteRole",
+                "iam:UpdateAssumeRolePolicy",
+                "iam:GetRole",
+                "iam:PassRole"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "lambda:CreateFunction",
+                "lambda:UpdateFunctionCode",
+                "lambda:UpdateFunctionConfiguration",
+                "lambda:InvokeFunction",
+                "lambda:GetFunction",
+                "lambda:DeleteFunction"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ec2:DescribeInstances",
+                "ec2:StartInstances",
+                "ec2:StopInstances"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "s3:ListBucket",
+                "s3:GetObject"
+            ],
+            "Resource": "*"
+        }
+    ]
+}
+```
+
 ## Deployment
 
 1. **Package the Lambda Function:**
