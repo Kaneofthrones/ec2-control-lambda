@@ -1,3 +1,2 @@
-[tool.ruff]
 exclude = ["src/six.py"]
-
+line-length = 120
