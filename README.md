@@ -10,14 +10,14 @@ This AWS Lambda function starts and stops EC2 instances based on their tags.
 
 ec2_control_lambda/
 ├── src/
-│ ├── ec2_control.py
-│ └── requirements.txt
+│   ├── ec2_control.py
+│   └── requirements.txt
 ├── scripts/
-│ └── package_lambda.sh
+│   └── package_lambda.sh
 ├── terraform/
-│ ├── main.tf
-│ ├── variables.tf
-│ └── outputs.tf
+│   ├── main.tf
+│   ├── variables.tf
+│   └── outputs.tf
 └── README.md
 
 
