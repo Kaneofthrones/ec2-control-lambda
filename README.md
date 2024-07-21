@@ -104,15 +104,6 @@ Make sure the aws IAM role you use has the following permissions
     terraform apply
     ```
 
-## Example Event to stop an instance
-
-```json
-{
-    "action": "stop",
-    "tag_name": "Name",
-    "tag_value": "RowdenInstance"
-}
-```
 ## Terraform plan
 
 ```terraform plan
@@ -201,4 +192,14 @@ Plan: 4 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
   + lambda_function_name = "ec2_control_lambda"
+```
+
+## Example Event to stop an instance
+
+```json
+{
+    "action": "stop",
+    "tag_name": "Name",
+    "tag_value": "RowdenInstance"
+}
 ```
