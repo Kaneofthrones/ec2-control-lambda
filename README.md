@@ -45,7 +45,7 @@ ec2_control_lambda/
     "tag_name": "Name",
     "tag_value": "RowdenInstance"
 }
-
+```
 ## Terraform plan
 
 ```terraform plan
