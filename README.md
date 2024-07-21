@@ -37,7 +37,7 @@ ec2_control_lambda/
     terraform apply
     ```
 
-## Example Event
+## Example Event to stop an instance
 
 ```json
 {
