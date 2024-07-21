@@ -1,7 +1,3 @@
-# ec2-lambda-infra
-
-Make a lambda to stop and start ec2 instances depending on a given name tag
-
 # EC2 Control Lambda Function
 
 This AWS Lambda function starts and stops EC2 instances based on their tags.
@@ -80,7 +76,21 @@ Make sure the aws IAM role you use has the following permissions
             "Effect": "Allow",
             "Action": [
                 "s3:ListBucket",
-                "s3:GetObject"
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:DeleteObject"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "dynamodb:PutItem",
+                "dynamodb:GetItem",
+                "dynamodb:DeleteItem",
+                "dynamodb:UpdateItem",
+                "dynamodb:Scan",
+                "dynamodb:Query"
             ],
             "Resource": "*"
         }
@@ -106,9 +116,7 @@ Make sure the aws IAM role you use has the following permissions
 
 ## Terraform plan
 
-```terraform plan
-Terraform will perform the following actions:
-
+```Terraform will perform the following actions:
   # aws_iam_role.lambda_exec will be created
   + resource "aws_iam_role" "lambda_exec" {
       + arn                   = (known after apply)
@@ -137,22 +145,20 @@ Terraform will perform the following actions:
       + path                  = "/"
       + tags_all              = (known after apply)
       + unique_id             = (known after apply)
+      + inline_policy (known after apply)
     }
-
   # aws_iam_role_policy_attachment.lambda_basic_execution will be created
   + resource "aws_iam_role_policy_attachment" "lambda_basic_execution" {
       + id         = (known after apply)
       + policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
       + role       = "lambda_exec_role"
     }
-
   # aws_iam_role_policy_attachment.lambda_ec2_execution will be created
   + resource "aws_iam_role_policy_attachment" "lambda_ec2_execution" {
       + id         = (known after apply)
       + policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
       + role       = "lambda_exec_role"
     }
-
   # aws_lambda_function.ec2_control will be created
   + resource "aws_lambda_function" "ec2_control" {
       + architectures                  = (known after apply)
@@ -180,19 +186,170 @@ Terraform will perform the following actions:
       + tags_all                       = (known after apply)
       + timeout                        = 60
       + version                        = (known after apply)
-
       + environment {
           + variables = {
               + "LOG_LEVEL" = "INFO"
             }
         }
+      + ephemeral_storage (known after apply)
+      + logging_config (known after apply)
+      + tracing_config (known after apply)
+      + vpc_config {
+          + ipv6_allowed_for_dual_stack = false
+          + security_group_ids          = (known after apply)
+          + subnet_ids                  = (known after apply)
+          + vpc_id                      = (known after apply)
+        }
     }
-
-Plan: 4 to add, 0 to change, 0 to destroy.
+  # aws_security_group.lambda_sg will be created
+  + resource "aws_security_group" "lambda_sg" {
+      + arn                    = (known after apply)
+      + description            = "Managed by Terraform"
+      + egress                 = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + from_port        = 0
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "-1"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 0
+                # (1 unchanged attribute hidden)
+            },
+        ]
+      + id                     = (known after apply)
+      + ingress                = [
+          + {
+              + cidr_blocks      = [
+                  + "0.0.0.0/0",
+                ]
+              + from_port        = 443
+              + ipv6_cidr_blocks = []
+              + prefix_list_ids  = []
+              + protocol         = "tcp"
+              + security_groups  = []
+              + self             = false
+              + to_port          = 443
+                # (1 unchanged attribute hidden)
+            },
+        ]
+      + name                   = "lambda_security_group"
+      + name_prefix            = (known after apply)
+      + owner_id               = (known after apply)
+      + revoke_rules_on_delete = false
+      + tags                   = {
+          + "Name" = "lambda_security_group"
+        }
+      + tags_all               = {
+          + "Name" = "lambda_security_group"
+        }
+      + vpc_id                 = (known after apply)
+    }
+  # aws_subnet.subnet_a will be created
+  + resource "aws_subnet" "subnet_a" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "eu-west-2a"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.1.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "subnet_a"
+        }
+      + tags_all                                       = {
+          + "Name" = "subnet_a"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+  # aws_subnet.subnet_b will be created
+  + resource "aws_subnet" "subnet_b" {
+      + arn                                            = (known after apply)
+      + assign_ipv6_address_on_creation                = false
+      + availability_zone                              = "eu-west-2b"
+      + availability_zone_id                           = (known after apply)
+      + cidr_block                                     = "10.0.2.0/24"
+      + enable_dns64                                   = false
+      + enable_resource_name_dns_a_record_on_launch    = false
+      + enable_resource_name_dns_aaaa_record_on_launch = false
+      + id                                             = (known after apply)
+      + ipv6_cidr_block_association_id                 = (known after apply)
+      + ipv6_native                                    = false
+      + map_public_ip_on_launch                        = false
+      + owner_id                                       = (known after apply)
+      + private_dns_hostname_type_on_launch            = (known after apply)
+      + tags                                           = {
+          + "Name" = "subnet_b"
+        }
+      + tags_all                                       = {
+          + "Name" = "subnet_b"
+        }
+      + vpc_id                                         = (known after apply)
+    }
+  # aws_vpc.main will be created
+  + resource "aws_vpc" "main" {
+      + arn                                  = (known after apply)
+      + cidr_block                           = "10.0.0.0/16"
+      + default_network_acl_id               = (known after apply)
+      + default_route_table_id               = (known after apply)
+      + default_security_group_id            = (known after apply)
+      + dhcp_options_id                      = (known after apply)
+      + enable_dns_hostnames                 = (known after apply)
+      + enable_dns_support                   = true
+      + enable_network_address_usage_metrics = (known after apply)
+      + id                                   = (known after apply)
+      + instance_tenancy                     = "default"
+      + ipv6_association_id                  = (known after apply)
+      + ipv6_cidr_block                      = (known after apply)
+      + ipv6_cidr_block_network_border_group = (known after apply)
+      + main_route_table_id                  = (known after apply)
+      + owner_id                             = (known after apply)
+      + tags                                 = {
+          + "Name" = "main_vpc"
+        }
+      + tags_all                             = {
+          + "Name" = "main_vpc"
+        }
+    }
+Plan: 8 to add, 0 to change, 0 to destroy.
 
 Changes to Outputs:
   + lambda_function_name = "ec2_control_lambda"
 ```
+
+## CI/CD extra steps
+
+### Setup remote backend
+
+**Create an S3 bucket** 
+
+```aws s3api create-bucket --bucket <bucket_name> --region eu-west-2 --create-bucket-configuration LocationConstraint=eu-west-2
+```
+**Create a dynamoDB table**
+
+```aws dynamodb create-table --table-name <table_name> \
+  --attribute-definitions AttributeName=LockID,AttributeType=S \
+  --key-schema AttributeName=LockID,KeyType=HASH \
+  --provisioned-throughput ReadCapacityUnits=5,WriteCapacityUnits=5 \
+  --region eu-west-2
+```
+**Store values in a backend.tfvars file**
+
+terraform/backend.tfvars
+
+### Add Github Actions Workflow (With Linting)
+
+.github/workflow/deploy.yaml
 
 ## Example Event to stop an instance
 
