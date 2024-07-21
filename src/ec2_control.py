@@ -5,7 +5,7 @@ ec2 = boto3.client('ec2')
 def lambda_handler(event, context):
     action = event.get('action', 'stop')  # 'start' or 'stop'
     tag_name = event.get('tag_name', 'Name')
-    tag_value = event.get('tag_value', 'MyInstance')
+    tag_value = event.get('tag_value', 'Rowden')  # String to match in the tag value
 
     instances = get_instances_by_tag(tag_name, tag_value)
 
@@ -23,7 +23,7 @@ def get_instances_by_tag(tag_name, tag_value):
         Filters=[
             {
                 'Name': f'tag:{tag_name}',
-                'Values': [tag_value]
+                'Values': [f'*{tag_value}*']  # Use wildcards to match any part of the tag value
             }
         ]
     )
