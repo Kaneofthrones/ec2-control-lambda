@@ -46,6 +46,8 @@ ec2_control_lambda/
     "tag_value": "RowdenInstance"
 }
 
+## Terraform plan
+
 ```terraform plan
 Terraform will perform the following actions:
 
