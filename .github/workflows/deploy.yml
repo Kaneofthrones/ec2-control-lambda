@@ -5,6 +5,7 @@ on:
     paths:
       - src/ec2_control.py
       - terraform/**
+  workflow_dispatch:
 
 jobs:
   deploy:
