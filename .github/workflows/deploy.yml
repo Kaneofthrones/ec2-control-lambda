@@ -26,11 +26,10 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Lint Python Code
+    - name: Lint Python Code with Ruff
       run: |
-        pip install flake8
-        flake8 src/*.py
-      continue-on-error: true
+        pip install ruff
+        ruff check src
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v1
@@ -42,7 +41,6 @@ jobs:
         terraform fmt -check
         terraform validate
       working-directory: terraform
-      continue-on-error: true
 
     - name: Run packaging script
       run: |
