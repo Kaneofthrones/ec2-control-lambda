@@ -8,7 +8,7 @@ This AWS Lambda function starts and stops EC2 instances based on their tags.
 
 ## Project Structure
 
-ec2_control_lambda/
+```ec2_control_lambda/
 ├── src/
 │   ├── ec2_control.py
 │   └── requirements.txt
@@ -19,7 +19,7 @@ ec2_control_lambda/
 │   ├── variables.tf
 │   └── outputs.tf
 └── README.md
-
+```
 
 ## Deployment
 
