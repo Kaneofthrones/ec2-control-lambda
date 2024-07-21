@@ -66,9 +66,9 @@ resource "aws_lambda_function" "ec2_control" {
   function_name    = "ec2_control_lambda"
   role             = aws_iam_role.lambda_exec.arn
   handler          = "ec2_control.lambda_handler"
-  source_code_hash = filebase64sha256("${path.module}/../ec2_control_lambda.zip")  # Hash for version control
-  runtime          = "python3.8"  # Runtime environment
-  timeout          = 60  # Timeout duration in seconds
+  source_code_hash = filebase64sha256("${path.module}/../ec2_control_lambda.zip") # Hash for version control
+  runtime          = "python3.8"                                                  # Runtime environment
+  timeout          = 60                                                           # Timeout duration in seconds
 
   # Configure the VPC settings for the Lambda function
   vpc_config {
