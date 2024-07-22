@@ -97,8 +97,8 @@ resource "aws_security_group" "lambda_sg" {
 
 # VPC Endpoint for EC2 service
 resource "aws_vpc_endpoint" "ec2" {
-  vpc_id       = aws_vpc.main.id
-  service_name = "com.amazonaws.eu-west-2.ec2"
+  vpc_id            = aws_vpc.main.id
+  service_name      = "com.amazonaws.eu-west-2.ec2"
   vpc_endpoint_type = "Interface"
 
   subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
