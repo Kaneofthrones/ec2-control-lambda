@@ -360,3 +360,10 @@ terraform/backend.tfvars
     "tag_value": "RowdenInstance"
 }
 ```
+## Screenshots
+
+When running the above event on the lambda, the result will look like the screenshots below:
+
+![Stop success](images/screenshot1.png)
+
+![Start success](images/screenshot2.png)
