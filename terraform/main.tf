@@ -64,6 +64,48 @@ resource "aws_security_group" "lambda_sg" {
   }
 }
 
+resource "aws_vpc_endpoint" "ec2" {
+  vpc_id       = aws_vpc.main.id
+  service_name = "com.amazonaws.eu-west-2.ec2"
+
+  route_table_ids = [aws_route_table.main.id]
+
+  tags = {
+    Name = "ec2_endpoint"
+  }
+}
+
+resource "aws_route_table" "main" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.main.id
+  }
+
+  tags = {
+    Name = "main_route_table"
+  }
+}
+
+resource "aws_route_table_association" "a" {
+  subnet_id      = aws_subnet.subnet_a.id
+  route_table_id = aws_route_table.main.id
+}
+
+resource "aws_route_table_association" "b" {
+  subnet_id      = aws_subnet.subnet_b.id
+  route_table_id = aws_route_table.main.id
+}
+
+resource "aws_internet_gateway" "main" {
+  vpc_id = aws_vpc.main.id
+
+  tags = {
+    Name = "main_igw"
+  }
+}
+
 resource "aws_lambda_function" "ec2_control" {
   filename         = "${path.module}/../ec2_control_lambda.zip"
   function_name    = "ec2_control_lambda"
@@ -140,4 +182,16 @@ resource "aws_iam_policy" "lambda_ec2_custom_policy" {
 resource "aws_iam_role_policy_attachment" "lambda_custom_policy_attachment" {
   role       = aws_iam_role.lambda_exec.name
   policy_arn = aws_iam_policy.lambda_ec2_custom_policy.arn
+}
+
+output "vpc_id" {
+  value = aws_vpc.main.id
+}
+
+output "subnet_ids" {
+  value = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+}
+
+output "security_group_id" {
+  value = aws_security_group.lambda_sg.id
 }
