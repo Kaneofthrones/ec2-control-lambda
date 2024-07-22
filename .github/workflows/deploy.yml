@@ -31,6 +31,10 @@ jobs:
         pip install ruff
         ruff check src --config .ruff.toml  # Ensure Ruff uses the config file
 
+    - name: Remove old zip file
+      run: |
+        rm -f ec2_control_lambda.zip
+
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
       with:
