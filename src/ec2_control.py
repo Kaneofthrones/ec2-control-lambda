@@ -1,78 +1,61 @@
 import boto3
+import logging
 
-ec2 = boto3.client('ec2')
-
+logger = logging.getLogger()
+logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context):
-    """
-    Main function to handle the Lambda event.
-    
-    Parameters:
-    event (dict): The event data passed to the Lambda function.
-    context (LambdaContext): The runtime information of the Lambda function.
-    
-    Returns:
-    dict: A dictionary with the status and details of the operation.
-    """
-    action = event.get('action', 'stop')  # 'start' or 'stop'
-    tag_name = event.get('tag_name', 'Name')
-    tag_value = event.get('tag_value', 'Rowden')  # String to match in the tag value
+    ec2 = boto3.client('ec2', region_name='eu-west-2')
+    try:
+        action = event.get('action', 'stop')  # 'start' or 'stop'
+        tag_name = event.get('tag_name', 'Name')
+        tag_value = event.get('tag_value', 'Rowden')  # String to match in the tag value
 
-    instances = get_instances_by_tag(tag_name, tag_value)
+        instances = get_instances_by_tag(ec2, tag_name, tag_value)
 
-    if action == 'start':
-        start_instances(instances)
-    elif action == 'stop':
-        stop_instances(instances)
-    else:
-        return {'status': 'error', 'message': 'Invalid action'}
+        if action == 'start':
+            start_instances(ec2, instances)
+        elif action == 'stop':
+            stop_instances(ec2, instances)
+        else:
+            return {'status': 'error', 'message': 'Invalid action'}
 
-    return {'status': 'success', 'action': action, 'instances': instances}
+        return {'status': 'success', 'action': action, 'instances': instances}
+    except Exception as e:
+        logger.error("Error occurred: %s", e)
+        raise e
 
+def get_instances_by_tag(ec2, tag_name, tag_value):
+    try:
+        response = ec2.describe_instances(
+            Filters=[
+                {
+                    'Name': f'tag:{tag_name}',
+                    'Values': [f'*{tag_value}*']  # Use wildcards to match any part of the tag value
+                }
+            ]
+        )
+        instances = []
+        for reservation in response['Reservations']:
+            for instance in reservation['Instances']:
+                instances.append(instance['InstanceId'])
+        return instances
+    except Exception as e:
+        logger.error("Error in get_instances_by_tag: %s", e)
+        raise e
 
-def get_instances_by_tag(tag_name, tag_value):
-    """
-    Retrieve a list of EC2 instances that match a given tag name and tag value.
-    
-    Parameters:
-    tag_name (str): The name of the tag to filter by.
-    tag_value (str): The value of the tag to filter by (supports wildcards).
-    
-    Returns:
-    list: A list of instance IDs that match the filter.
-    """
-    response = ec2.describe_instances(
-        Filters=[
-            {
-                'Name': f'tag:{tag_name}',
-                'Values': [f'*{tag_value}*']  # Use wildcards to match any part of the tag value
-            }
-        ]
-    )
-    instances = []
-    for reservation in response['Reservations']:
-        for instance in reservation['Instances']:
-            instances.append(instance['InstanceId'])
-    return instances
+def start_instances(ec2, instances):
+    try:
+        ec2.start_instances(InstanceIds=instances)
+        ec2.get_waiter('instance_running').wait(InstanceIds=instances)
+    except Exception as e:
+        logger.error("Error in start_instances: %s", e)
+        raise e
 
-
-def start_instances(instances):
-    """
-    Start the given list of EC2 instances.
-    
-    Parameters:
-    instances (list): The list of instance IDs to start.
-    """
-    ec2.start_instances(InstanceIds=instances)
-    ec2.get_waiter('instance_running').wait(InstanceIds=instances)
-
-
-def stop_instances(instances):
-    """
-    Stop the given list of EC2 instances.
-    
-    Parameters:
-    instances (list): The list of instance IDs to stop.
-    """
-    ec2.stop_instances(InstanceIds=instances)
-    ec2.get_waiter('instance_stopped').wait(InstanceIds=instances)
+def stop_instances(ec2, instances):
+    try:
+        ec2.stop_instances(InstanceIds=instances)
+        ec2.get_waiter('instance_stopped').wait(InstanceIds=instances)
+    except Exception as e:
+        logger.error("Error in stop_instances: %s", e)
+        raise e
