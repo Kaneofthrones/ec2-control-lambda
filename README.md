@@ -4,13 +4,19 @@ This AWS Lambda function starts and stops EC2 instances based on their tags.
 
 ## Project Structure
 
-```ec2_control_lambda/
+```
+ec2_control_lambda/
 ├── src/
 │   ├── ec2_control.py
 │   └── requirements.txt
 ├── scripts/
 │   └── package_lambda.sh
+├── ec2_instance/
+│   ├── main.tf
+│   ├── variables.tf
+│   └── outputs.tf
 ├── terraform/
+│   ├── backend.tfvars
 │   ├── main.tf
 │   ├── variables.tf
 │   └── outputs.tf
