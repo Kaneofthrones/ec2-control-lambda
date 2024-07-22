@@ -51,16 +51,16 @@ jobs:
       run: terraform init -backend-config=backend.tfvars
       working-directory: terraform
 
+    - name: Run packaging script
+      run: |
+        chmod +x scripts/package_lambda.sh
+        bash scripts/package_lambda.sh
+
     - name: Lint Terraform Code
       run: |
         terraform fmt -check
         terraform validate
       working-directory: terraform
-
-    - name: Run packaging script
-      run: |
-        chmod +x scripts/package_lambda.sh
-        bash scripts/package_lambda.sh
 
     - name: Terraform Init
       run: terraform init
