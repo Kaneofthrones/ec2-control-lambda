@@ -367,3 +367,11 @@ When running the above event on the lambda, the result will look like the screen
 ![Stop success](images/screenshot1.png)
 
 ![Start success](images/screenshot2.png)
+
+## Future Improvements
+
+1. Move the github actions to use OIDC instead of access key to connect to AWS
+
+2. Update the ec2 instance code to use remote backend
+
+3. Improve the folder structure of the terraform by splitting out the lambda, networking and vpc's into separete modules 
