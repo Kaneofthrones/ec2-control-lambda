@@ -40,7 +40,8 @@ ec2_control_lambda/
 
 Make sure the aws IAM role you use has the following permissions
 
-```{
+```
+{
     "Version": "2012-10-17",
     "Statement": [
         {
@@ -97,6 +98,25 @@ Make sure the aws IAM role you use has the following permissions
                 "dynamodb:UpdateItem",
                 "dynamodb:Scan",
                 "dynamodb:Query"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+            ],
+            "Resource": "*"
+        },
+        {
+            "Effect": "Allow",
+            "Action": [
+                "ssm:GetParameter",
+                "ssm:GetParameters",
+                "ssm:GetParametersByPath",
+                "ssm:PutParameter"
             ],
             "Resource": "*"
         }
