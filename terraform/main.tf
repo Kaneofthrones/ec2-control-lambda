@@ -29,27 +29,28 @@ resource "aws_internet_gateway" "main" {
   }
 }
 
-resource "aws_subnet" "subnet_a" {
+resource "aws_subnet" "public_subnet" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.1.0/24"
   availability_zone = "eu-west-2a"
+  map_public_ip_on_launch = true
 
   tags = {
-    Name = "subnet_a"
+    Name = "public_subnet"
   }
 }
 
-resource "aws_subnet" "subnet_b" {
+resource "aws_subnet" "private_subnet" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.0.2.0/24"
   availability_zone = "eu-west-2b"
 
   tags = {
-    Name = "subnet_b"
+    Name = "private_subnet"
   }
 }
 
-resource "aws_route_table" "main" {
+resource "aws_route_table" "public" {
   vpc_id = aws_vpc.main.id
 
   route {
@@ -58,18 +59,44 @@ resource "aws_route_table" "main" {
   }
 
   tags = {
-    Name = "main_route_table"
+    Name = "public_route_table"
   }
 }
 
-resource "aws_route_table_association" "a" {
-  subnet_id      = aws_subnet.subnet_a.id
-  route_table_id = aws_route_table.main.id
+resource "aws_route_table_association" "public_assoc" {
+  subnet_id      = aws_subnet.public_subnet.id
+  route_table_id = aws_route_table.public.id
 }
 
-resource "aws_route_table_association" "b" {
-  subnet_id      = aws_subnet.subnet_b.id
-  route_table_id = aws_route_table.main.id
+resource "aws_eip" "nat" {
+  vpc = true
+}
+
+resource "aws_nat_gateway" "main" {
+  allocation_id = aws_eip.nat.id
+  subnet_id     = aws_subnet.public_subnet.id
+
+  tags = {
+    Name = "main_nat_gateway"
+  }
+}
+
+resource "aws_route_table" "private" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block     = "0.0.0.0/0"
+    nat_gateway_id = aws_nat_gateway.main.id
+  }
+
+  tags = {
+    Name = "private_route_table"
+  }
+}
+
+resource "aws_route_table_association" "private_assoc" {
+  subnet_id      = aws_subnet.private_subnet.id
+  route_table_id = aws_route_table.private.id
 }
 
 resource "aws_security_group" "lambda_sg" {
@@ -95,21 +122,6 @@ resource "aws_security_group" "lambda_sg" {
   }
 }
 
-# VPC Endpoint for EC2 service
-resource "aws_vpc_endpoint" "ec2" {
-  vpc_id            = aws_vpc.main.id
-  service_name      = "com.amazonaws.eu-west-2.ec2"
-  vpc_endpoint_type = "Interface"
-
-  subnet_ids = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
-
-  security_group_ids = [aws_security_group.lambda_sg.id]
-
-  tags = {
-    Name = "ec2_endpoint"
-  }
-}
-
 resource "aws_lambda_function" "ec2_control" {
   filename         = "${path.module}/../ec2_control_lambda.zip"
   function_name    = "ec2_control_lambda"
@@ -120,7 +132,7 @@ resource "aws_lambda_function" "ec2_control" {
   timeout          = 120
 
   vpc_config {
-    subnet_ids         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
+    subnet_ids         = [aws_subnet.private_subnet.id]
     security_group_ids = [aws_security_group.lambda_sg.id]
   }
 
@@ -163,7 +175,6 @@ resource "aws_iam_role_policy_attachment" "lambda_ec2_execution" {
   policy_arn = "arn:aws:iam::aws:policy/AmazonEC2FullAccess"
 }
 
-# Adding custom policy for describing and stopping instances
 resource "aws_iam_policy" "lambda_ec2_custom_policy" {
   name = "lambda_ec2_custom_policy"
 
