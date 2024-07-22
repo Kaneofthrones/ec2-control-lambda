@@ -168,15 +168,31 @@ resource "aws_iam_policy" "lambda_ec2_custom_policy" {
   name = "lambda_ec2_custom_policy"
 
   policy = jsonencode({
-    Version = "2012-10-17"
+    Version = "2012-10-17",
     Statement = [
       {
-        Effect = "Allow"
+        Effect = "Allow",
         Action = [
           "ec2:DescribeInstances",
+          "ec2:StartInstances",
           "ec2:StopInstances",
-          "ec2:StartInstances"
-        ]
+          "ec2:DescribeRegions",
+          "ec2:DescribeVpcEndpoints",
+          "ec2:DescribeVpcEndpointConnections",
+          "ec2:DescribeVpcEndpointServiceConfigurations",
+          "ec2:DescribeVpcEndpointServices",
+          "ec2:DescribeVpcPeeringConnections",
+          "ec2:DescribeVpcClassicLinkDnsSupport"
+        ],
+        Resource = "*"
+      },
+      {
+        Effect = "Allow",
+        Action = [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
         Resource = "*"
       }
     ]
