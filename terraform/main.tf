@@ -71,7 +71,7 @@ resource "aws_lambda_function" "ec2_control" {
   handler          = "ec2_control.lambda_handler"
   source_code_hash = filebase64sha256("${path.module}/../ec2_control_lambda.zip")
   runtime          = "python3.8"
-  timeout          = 300
+  timeout          = 120
 
   vpc_config {
     subnet_ids         = [aws_subnet.subnet_a.id, aws_subnet.subnet_b.id]
